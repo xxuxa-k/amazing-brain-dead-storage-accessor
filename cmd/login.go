@@ -12,6 +12,7 @@ import (
 	"mime/multipart"
 
 	"github.com/spf13/cobra"
+	"github.com/xxuxa-k/amazing-brain-dead-storage-accessor/internal"
 )
 
 var as string
@@ -40,24 +41,6 @@ func prerunLoginCmd(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-type AdminAuthTokenRequest struct {
-	Code string `json:"code"`
-	Service string `json:"service"`
-	ServiceKey string `json:"service_key"`
-	ID string `json:"id"`
-	Password string `json:"password"`
-}
-type AdminAuthTokenResponse struct {
-	Success bool `json:"success"`
-	AccessToken string `json:"access_token"`
-	Expire string `json:"expire"`
-	ExpireTimestamp int `json:"expire_timestamp"`
-}
-type AdminAuthTokenErrorResponse struct {
-	Success bool `json:"success"`
-	All string `json:"all"`
-	ResultCode string `json:"result_code"`
-}
 
 func loginAsAdmin() error {
 	var b bytes.Buffer
@@ -84,7 +67,7 @@ func loginAsAdmin() error {
 
 	u, err := url.Parse("https://api.directcloud.jp/openapi/jauth/token")
 	if err != nil {
-		return fmt.Errorf("Failed to parse auth URL: %v", err)
+		return fmt.Errorf("Failed to parse URL: %v", err)
 	}
 	params := url.Values{}
 	params.Add("lang", "eng")
@@ -111,7 +94,7 @@ func loginAsAdmin() error {
 		return fmt.Errorf("Login request failed with status: %s, body: %s", resp.Status, string(body))
 	}
 
-	token := &AdminAuthTokenResponse{}
+	token := &internal.AdminAuthTokenResponse{}
 	if err := json.Unmarshal(body, token); err != nil {
 		return fmt.Errorf("Failed to parse login response: %v", err)
 	}

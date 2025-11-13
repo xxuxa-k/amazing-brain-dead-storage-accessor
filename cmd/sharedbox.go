@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
@@ -13,9 +15,12 @@ func init() {
 
 var sharedboxCmd = &cobra.Command{
 	Use:   "sharedbox",
-	// RunE: runSharedboxCmd,
+	PreRunE: runSharedboxPreRunE,
 }
 
-// func runSharedboxCmd(cmd *cobra.Command, args []string) error {
-// 	return nil
-// }
+func runSharedboxPreRunE(cmd *cobra.Command, args []string) error {
+	if mongoClient == nil {
+		return fmt.Errorf("MongoDB client is not initialized")
+	}
+	return nil
+}
