@@ -24,6 +24,10 @@ func init() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	rootCmd.AddCommand(checkCmd)
+	rootCmd.AddCommand(
+		checkCmd,
+		loginCmd,
+		sharedboxCmd,
+	)
 }
 
