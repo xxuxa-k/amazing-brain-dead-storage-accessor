@@ -1,12 +1,28 @@
-package internal
+package cmd
 
-type AdminAuthTokenRequest struct {
-	Code string `json:"code"`
-	Service string `json:"service"`
-	ServiceKey string `json:"service_key"`
-	ID string `json:"id"`
-	Password string `json:"password"`
+import (
+	"net/http"
+)
+
+type AdminApiClient struct {
+	AccessToken string
+	httpClient  *http.Client
 }
+func NewAdminApiClient(token string) *AdminApiClient {
+	return &AdminApiClient{
+		AccessToken: token,
+		httpClient: &http.Client{},
+	}
+}
+func (c *AdminApiClient) NewGetRequest(url string) (*http.Request, error) {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("access_token", c.AccessToken)
+	return req, nil
+}
+
 type AdminAuthTokenResponse struct {
 	Success bool `json:"success"`
 	AccessToken string `json:"access_token"`
@@ -18,7 +34,6 @@ type AdminAuthTokenErrorResponse struct {
 	All string `json:"all"`
 	ResultCode string `json:"result_code"`
 }
-
 type SharedBoxListResponse struct {
 	Success bool `json:"success"`
 	Total int `json:"total"`
