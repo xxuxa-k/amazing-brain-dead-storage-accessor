@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"log/slog"
@@ -43,17 +44,13 @@ var rootCmd = &cobra.Command{
 		if mongoClient != nil {
 			if err := closeMongoClient(cmdCtx); err != nil {
 				log.Printf("Error closing MongoDB client: %v", err)
-				if combinedErr == nil {
-					combinedErr = err
-				}
+				combinedErr = errors.Join(combinedErr, err)
 			}
 		}
 		if redisClient != nil {
 			if err := redisClient.Close(); err != nil {
 				log.Printf("Error closing Redis client: %v", err)
-				if combinedErr == nil {
-					combinedErr = err
-				}
+				combinedErr = errors.Join(combinedErr, err)
 			}
 		}
 		return combinedErr
@@ -62,10 +59,11 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	sessionID = uuid.New().String()
-	logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
 	logger.Info("Application started", "sessionID", sessionID)
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
+		logger.Error("Error loading .env file")
+		os.Exit(1)
 	}
 	rootCmd.PersistentFlags().Bool("verbose", false, "Enable verbose output")
 	rootCmd.AddCommand(
@@ -76,7 +74,8 @@ func init() {
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		log.Println(err)
+		logger.Error("Command execution failed", "error", err)
+		// log.Println(err)
 		os.Exit(1)
 	}
 }

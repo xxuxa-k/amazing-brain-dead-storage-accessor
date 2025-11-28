@@ -8,6 +8,7 @@ require (
 	github.com/redis/go-redis/v9 v9.16.0
 	github.com/spf13/cobra v1.10.1
 	go.mongodb.org/mongo-driver v1.17.6
+	golang.org/x/time v0.14.0
 )
 
 require (

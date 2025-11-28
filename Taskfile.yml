@@ -1,0 +1,12 @@
+version: "3"
+
+dotenv: [".env"]
+
+tasks:
+  mongosh:
+    cmds:
+      - mongosh "mongodb://$MONGO_HOST:$MONGO_PORT/$MONGO_DATABASE"
+  redis-cli:
+    cmds:
+      - redis-cli -h $REDIS_HOST -p $REDIS_PORT
+
