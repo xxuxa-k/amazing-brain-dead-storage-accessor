@@ -5,7 +5,7 @@ dotenv: [".env"]
 tasks:
   mongosh:
     cmds:
-      - mongosh "mongodb://$MONGO_HOST:$MONGO_PORT/$MONGO_DATABASE"
+      - mongosh "mongodb://$MONGO_HOST:$MONGO_PORT"
   redis-cli:
     cmds:
       - redis-cli -h $REDIS_HOST -p $REDIS_PORT
