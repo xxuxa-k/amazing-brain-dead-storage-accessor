@@ -9,9 +9,8 @@ var sharedboxCmd = &cobra.Command{
 }
 
 func init() {
-	sharedboxCmd.PersistentFlags().String("node", "", "node to operate on")
 	sharedboxCmd.AddCommand(
-		sharedboxImportCmd,
+		sharedboxSyncCmd,
 		sharedboxExportCmd,
 		)
 }

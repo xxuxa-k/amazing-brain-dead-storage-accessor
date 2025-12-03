@@ -95,6 +95,11 @@ type SharedBoxListItemWithParent struct {
 	ParentNode string `json:"parent_node" bson:"parent_node"`
 }
 
+type SharedBoxHierarchy struct {
+	Items map[string]SharedBoxListItemWithParent 
+	Children map[string][]string 
+}
+
 type NodeError struct {
 	Node string
 	Err error

@@ -2,6 +2,8 @@
 
 /_mongodb/
 /_redis/
+/logs/
+/exports/
 
 admin_token.json
 user_token.json

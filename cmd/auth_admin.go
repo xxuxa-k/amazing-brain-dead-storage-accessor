@@ -3,8 +3,10 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -21,24 +23,30 @@ var authAdminCmd = &cobra.Command{
 func init() {}
 
 func runAuthAdminCmd(cmd *cobra.Command, args []string) error {
+	cmdCtx := cmd.Context()
 	var b bytes.Buffer
+	var fieldErr error
 	w := multipart.NewWriter(&b)
-
 	if err := w.WriteField("code", os.Getenv("DIRECTCLOUD_CODE")); err != nil {
-		return fmt.Errorf("Failed to write field 'code': %w", err)
+		fieldErr = errors.Join(fieldErr, err)
 	}
 	if err := w.WriteField("service", os.Getenv("DIRECTCLOUD_ADMIN_SERVICE")); err != nil {
-		return fmt.Errorf("Failed to write field 'service': %w", err)
+		fieldErr = errors.Join(fieldErr, err)
 	}
 	if err := w.WriteField("service_key", os.Getenv("DIRECTCLOUD_ADMIN_SERVICE_KEY")); err != nil {
-		return fmt.Errorf("Failed to write field 'service_key': %w", err)
+		fieldErr = errors.Join(fieldErr, err)
 	}
 	if err := w.WriteField("id", os.Getenv("DIRECTCLOUD_ADMIN_ID")); err != nil {
-		return fmt.Errorf("Failed to write field 'id': %w", err)
+		fieldErr = errors.Join(fieldErr, err)
 	}
 	if err := w.WriteField("password", os.Getenv("DIRECTCLOUD_ADMIN_PASSWORD")); err != nil {
-		return fmt.Errorf("Failed to write field 'password': %w", err)
+		fieldErr = errors.Join(fieldErr, err)
 	}
+	if fieldErr != nil {
+		slog.ErrorContext(cmdCtx, "Failed to write form fields", "error", fieldErr)
+		return fieldErr
+	}
+
 	if err := w.Close(); err != nil {
 		return fmt.Errorf("Failed to close multipart writer: %w", err)
 	}
@@ -85,6 +93,6 @@ func runAuthAdminCmd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("Failed to write token to file: %w", err)
 	}
 
-	logger.Info("admin_token.json saved successfully")
+	slog.InfoContext(cmdCtx, "admin_token.json saved successfully")
 	return nil
 }
