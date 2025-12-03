@@ -144,8 +144,8 @@ func runSharedboxExportCmd(cmd *cobra.Command, args []string) error {
 		}
 		row := []string{
 			result.ParentNode,
-			result.Item.Node,
 			result.Item.Name,
+			result.Item.Node,
 			result.Item.URL,
 			result.Item.DrivePath,
 		}
