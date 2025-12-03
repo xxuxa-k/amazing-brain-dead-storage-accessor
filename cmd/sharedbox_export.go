@@ -96,8 +96,8 @@ func runSharedboxExportCmd(cmd *cobra.Command, args []string) error {
 
 	header := []string{
 		"ParentNode",
-		"Node",
 		"Name",
+		"Node",
 		"URL",
 		"DrivePath",
 	}

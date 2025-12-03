@@ -94,5 +94,6 @@ func runAuthAdminCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	slog.InfoContext(cmdCtx, "admin_token.json saved successfully")
+	fmt.Println("admin_token.json saved successfully")
 	return nil
 }
