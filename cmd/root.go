@@ -31,6 +31,7 @@ var (
 const (
 	MONGO_DEFAULT_DATABASE = "amazing_brain_dead_storage_accessor"
 	MONGO_COLLECTION_SHAREDBOXES = "sharedboxes"
+	MONGO_COLLECTION_USERS = "users"
 	DIRECTORY_DEFAULT_LOGS = "logs"
 	DIRECTORY_DEFAULT_EXPORT = "exports"
 )
@@ -83,6 +84,7 @@ func init() {
 	rootCmd.PersistentFlags().Bool("verbose", false, "Enable verbose output")
 	rootCmd.AddCommand(
 		authCmd,
+		userCmd,
 		sharedboxCmd,
 		)
 }
@@ -182,7 +184,7 @@ func initMongoIndexes(cmd *cobra.Command) error {
 		"database", mongoDatabase,
 		)
 	db := mongoClient.Database(mongoDatabase)
-	var completedErr error
+	var indexErr error
 	func() {
 		collection := db.Collection(MONGO_COLLECTION_SHAREDBOXES)
 		ctx, cancel := context.WithTimeout(cmdCtx, 30*time.Second)
@@ -199,12 +201,33 @@ func initMongoIndexes(cmd *cobra.Command) error {
 			slog.ErrorContext(cmdCtx, "Failed to create index on sharedboxes collection",
 				"error", err,
 				)
-			completedErr = errors.Join(completedErr, err)
+			indexErr = errors.Join(indexErr, err)
 			return
 		}
 		slog.DebugContext(cmdCtx, "MongoDB index ensured on sharedboxes collection",)
 	}()
-	return completedErr
+	func() {
+		collection := db.Collection(MONGO_COLLECTION_USERS)
+		ctx, cancel := context.WithTimeout(cmdCtx, 30*time.Second)
+		defer cancel()
+		_, err := collection.Indexes().CreateOne(ctx, mongo.IndexModel{
+			Keys: bson.D{
+				{Key: "user_seq", Value: 1},
+			},
+			Options: options.Index().
+				SetUnique(true).
+				SetName("idx_user_seq_unique"),
+		})
+		if err != nil {
+			slog.ErrorContext(cmdCtx, "Failed to create index on sharedboxes collection",
+				"error", err,
+				)
+			indexErr = errors.Join(indexErr, err)
+			return
+		}
+		slog.DebugContext(cmdCtx, "MongoDB index ensured on users collection",)
+	}()
+	return indexErr
 }
 func closeMongoClient(cmdCtx context.Context) error {
 	disconnectCtx, disconnectCancel := context.WithTimeout(cmdCtx, 10*time.Second)

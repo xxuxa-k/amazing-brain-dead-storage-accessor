@@ -27,6 +27,37 @@ func (c *AdminApiClient) NewGetRequest(url string) (*http.Request, error) {
 	req.Header.Set("access_token", c.AccessToken)
 	return req, nil
 }
+func (c *AdminApiClient) UsersList(
+	ctx context.Context,
+) (UserListResponse, error) {
+	var result UserListResponse
+	u, _ := url.Parse("https://api.directcloud.jp/openapp/m1/users/lists/")
+	params := url.Values{}
+	params.Add("lang", "eng")
+	params.Add("limit", "1000")
+	u.RawQuery = params.Encode()
+	req, err := adminApiClient.NewGetRequest(u.String())
+	if err != nil {
+		return result, fmt.Errorf("Failed to create GET request: %w", err)
+	}
+	req = req.WithContext(ctx)
+	resp, err := adminApiClient.httpClient.Do(req)
+	if err != nil {
+		return result, fmt.Errorf("Failed to send GET request: %w", err)
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return result, fmt.Errorf("Failed to read response body: %v", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return result, fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
+	}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return result, fmt.Errorf("Failed to parse response JSON: %w", err)
+	}
+	return result, nil
+}
 func (c *AdminApiClient) SharedboxesList(
 	ctx context.Context,
 	node string,
@@ -77,6 +108,22 @@ type AdminAuthTokenErrorResponse struct {
 	Success bool `json:"success"`
 	All string `json:"all"`
 	ResultCode string `json:"result_code"`
+}
+type UserListResponse struct {
+	Success bool `json:"success"`
+	Total int `json:"total"`
+	Lists []UserListItem `json:"lists"`
+}
+type UserListItem struct {
+	UserSeq int `json:"user_seq" bson:"user_seq"`
+	RoleName string `json:"role_name" bson:"role_name"`
+	ID string `json:"id" bson:"id"`
+	Name string `json:"name" bson:"name"`
+	Email string `json:"email" bson:"email"`
+	Lang string `json:"lang" bson:"lang"`
+	Phone string `json:"phone" bson:"phone"`
+	Status int `json:"status" bson:"status"`
+	RegDate string `json:"regdate" bson:"regdate"`
 }
 type SharedBoxListResponse struct {
 	Success bool `json:"success"`
