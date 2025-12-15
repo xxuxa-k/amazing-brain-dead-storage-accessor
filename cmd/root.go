@@ -176,10 +176,6 @@ func initMongoClient(cmd *cobra.Command) error {
 }
 func initMongoIndexes(cmd *cobra.Command) error {
 	cmdCtx := cmd.Context()
-	mongoDatabase := os.Getenv("MONGO_DATABASE")
-	if mongoDatabase == "" {
-		mongoDatabase = MONGO_DEFAULT_DATABASE
-	}
 	slog.DebugContext(cmdCtx, "Using MongoDB database",
 		"database", mongoDatabase,
 		)

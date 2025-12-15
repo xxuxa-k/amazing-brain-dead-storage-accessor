@@ -28,7 +28,7 @@ var userSyncCmd = &cobra.Command{
 			return err
 		}
 		if len(resp.Lists) > 0 {
-			slog.DebugContext(cmdCtx, "First user in list", 
+			slog.DebugContext(cmdCtx, "user in list", 
 				"count", len(resp.Lists),
 				)
 			collection := mongoClient.Database(mongoDatabase).Collection(MONGO_COLLECTION_USERS)
